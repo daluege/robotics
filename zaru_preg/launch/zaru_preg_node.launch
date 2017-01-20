@@ -1,0 +1,3 @@
+<launch>
+ <node pkg="zaru_preg" type="zaru_preg_node" name="zaru_preg_node" output="screen"></node>
+</launch>
