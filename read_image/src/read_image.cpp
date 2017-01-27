@@ -4,7 +4,7 @@ using namespace std;
 
 #define PAINT_OUTPUT
 #define READ_IMAGE_DEBUG
-#define YAW_OFFSET -8
+#define YAW_OFFSET 0
 #define KP 0.5
 #define KD 20
 #define RATE 10
@@ -64,33 +64,25 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
     double dx_dt;
     double dt_twist = (current_time_twist - last_time_twist).toSec();
 
-	topleft = canny_image.cols;
-	topright = 0;
-	bottomleft = canny_image.cols;
-	bottomright = 0;
+	middlepoint = desired_middle_point;
 
-	for (int j = 0; j < canny_image.cols; ++j) {
+    // Look around at row #300 for the most central edge
+	for (int j = 0; j < canny_image.cols / 2; ++j) {
 		int read_point = 0;
 		// cv::Mat uses ROW-major system -> .at(y,x)
-		// find leftmost and rightmost non black pixels at y-line 280
-		read_point = canny_image.at<uint8_t>(280, j);
-		if(read_point > 0) {
-			if(topleft > j) topleft = j;
-			if(topright < j) topright = j;
+
+		// Look for the closest edge (= light pixel) left from the center
+		read_point = canny_image.at<uint8_t>(300, desired_middle_point - j);
+		if(read_point > 100) {
+			middlepoint = desired_middle_point - j;
 		}
-	}
-	for (int j = 0; j < canny_image.cols; ++j) {
-		int read_point = 0;
-		//cv::Mat uses ROW-major system -> .at(y,x)
-		// find leftmost and rightmost non black pixels at y-line 350
-		read_point = canny_image.at<uint8_t>(350, j);
-		if(read_point > 0){;
-		   	if(bottomleft > j) bottomleft = j;
-			if(bottomright < j) bottomright = j;				 
-		}
+        // Look for the closest edge (= light pixel) right from the center
+        read_point = canny_image.at<uint8_t>(300, desired_middle_point + j);
+        if(read_point > 100) {
+            middlepoint = desired_middle_point + j;
+        }
 	}
 	//ROS_INFO("bottomleft: %i , bottomright: %i , topleft: %i , topright: %i" , bottomleft, bottomright, topleft, topright);
-	middlepoint = (bottomleft + bottomright + topleft + topright ) / 4 ;
 
 	x = desired_middle_point - middlepoint;
     current_time_twist = ros::Time::now();
