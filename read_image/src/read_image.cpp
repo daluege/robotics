@@ -97,7 +97,7 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
     dx_dt = ((double) (x - last_x)) / 100; // dt_twist;
 
 	// simple P-controler
-	steering.data = int(kp * (-x)) + int(kd * (-dx_dt)) + 90 + YAW_OFFSET;
+	steering.data = -(int(kp * (-x)) + int(kd * (-dx_dt))) + 90 + YAW_OFFSET;
 	// limit steering data (0..180)
 	if(steering.data < 0) steering.data = 0;
 	if(steering.data > 180) steering.data = 180;
@@ -153,7 +153,7 @@ int main(int argc, char **argv)
 	ros::Rate r(RATE); // Rate: loops per second
 	while(ros::ok())
 	{
-		//pubSteering.publish(steering);
+		pubSteering.publish(steering);
 		ros::spinOnce();
 		r.sleep();
 	}
