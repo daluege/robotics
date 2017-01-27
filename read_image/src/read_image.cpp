@@ -6,11 +6,12 @@ using namespace std;
 #define READ_IMAGE_DEBUG
 #define YAW_OFFSET -8
 #define KP 0.5
+#define KD 20
 #define RATE 10
 
 static const uint32_t MY_ROS_QUEUE_SIZE = 1;
 std_msgs::Int16 steering;
-float kp = KP;
+float kp = KP, kd = KD;
 int last_x = 0;
 ros::Time last_time_twist;
 
@@ -96,7 +97,7 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
     dx_dt = ((double) (x - last_x)) / 100; // dt_twist;
 
 	// simple P-controler
-	steering.data = int(-kp * (x)) + 90 + YAW_OFFSET;
+	steering.data = int(kp * (-x)) + int(kd * (-dx_dt)) + 90 + YAW_OFFSET;
 	// limit steering data (0..180)
 	if(steering.data < 0) steering.data = 0;
 	if(steering.data > 180) steering.data = 180;
