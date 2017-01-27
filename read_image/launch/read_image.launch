@@ -1,0 +1,10 @@
+<launch>
+
+<node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/app/camera/rgb/image_raw out:=/sr300/image_raw" />
+  <node name="read_image_node" pkg="read_image" type="read_image_node" output="screen" > 
+    <param name="cam_w"                         type="int"    value="640"/>  
+    <param name="cam_h"                         type="int"    value="480"/> 
+    <param name="camera_name"     				type="string"   value="/sr300/image_raw"/>      
+    
+  </node>
+</launch>
