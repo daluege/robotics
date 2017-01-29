@@ -1,9 +1,9 @@
-#include "read_image.h"
+#include "line_follower.h"
 #include "std_msgs/Int16.h"
 using namespace std;
 
 #define PAINT_OUTPUT
-#define READ_IMAGE_DEBUG
+#define LINE_FOLLOWER_DEBUG
 #define YAW_OFFSET 0
 #define KP 0.5
 #define KD 20
@@ -25,7 +25,7 @@ cLaneDetectionFu::cLaneDetectionFu(ros::NodeHandle nh): nh_(nh), priv_nh_("~")
 	priv_nh_.param<std::string>(node_name + "/camera_name", camera_name, "/app/camera/rgb/image_raw");
 	priv_nh_.param<int>(node_name + "/cam_w", cam_w, 640);
 	priv_nh_.param<int>(node_name + "/cam_h", cam_h, 480);
-	read_images_ = nh.subscribe(nh_.resolveName(camera_name), MY_ROS_QUEUE_SIZE, &cLaneDetectionFu::ProcessInput,this);
+	line_followers_ = nh.subscribe(nh_.resolveName(camera_name), MY_ROS_QUEUE_SIZE, &cLaneDetectionFu::ProcessInput,this);
 
 	image_transport::ImageTransport image_transport(nh);
 	image_publisher = image_transport.advertiseCamera("/lane_model/lane_model_image", MY_ROS_QUEUE_SIZE);
@@ -95,7 +95,7 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
 	// limit steering data (0..180)
 	if(steering.data < 0) steering.data = 0;
 	if(steering.data > 180) steering.data = 180;
-	#ifdef READ_IMAGE_DEBUG
+	#ifdef LINE_FOLLOWER_DEBUG
 	ROS_INFO("x is : %i, change rate: %f, change Steering Data is: %i", x, dx_dt, steering.data);
 	#endif
 

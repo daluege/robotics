@@ -65,7 +65,7 @@ class cLaneDetectionFu
         ros::NodeHandle priv_nh_;
 
         // subscribers
-        ros::Subscriber read_images_;
+        ros::Subscriber line_followers_;
 
         // publishers
         ros::Publisher publish_images;

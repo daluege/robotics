@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(read_image)
+project(line_follower)
  
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
@@ -66,10 +66,10 @@ include_directories(include
 )
 
 ## Declare a cpp executable
-add_executable(read_image_node src/read_image.cpp)
+add_executable(line_follower_node src/line_follower.cpp)
 
 ## Specify libraries to link a library or executable target against
-target_link_libraries(read_image_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}) 
+target_link_libraries(line_follower_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES}) 
 
 #############
 ## Install ##
@@ -86,7 +86,7 @@ target_link_libraries(read_image_node ${catkin_LIBRARIES} ${OpenCV_LIBRARIES})
 # )
 
 ## Mark executables and/or libraries for installation
-install(TARGETS read_image_node
+install(TARGETS line_follower_node
   ARCHIVE DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   LIBRARY DESTINATION ${CATKIN_PACKAGE_LIB_DESTINATION}
   RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
