@@ -54,19 +54,19 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
 	cv::waitKey(1);
 	#endif
 
-    // Coordinate-related
+	// Coordinate-related
 	int desired_middle_point = canny_image.cols / 2;
 	int middlepoint, x;
 	int topleft, topright, bottomleft, bottomright;
 
-    // Time-related
-    ros::Time current_time_twist;
-    double dx_dt;
-    double dt_twist = (current_time_twist - last_time_twist).toSec();
+	// Time-related
+	ros::Time current_time_twist;
+	double dx_dt;
+	double dt_twist = (current_time_twist - last_time_twist).toSec();
 
 	middlepoint = desired_middle_point;
 
-    // Look around at row #300 for the most central edge
+	// Look around horizontally at row #300 for the most central edge
 	for (int j = 0; j < canny_image.cols / 2; ++j) {
 		int read_point = 0;
 		// cv::Mat uses ROW-major system -> .at(y,x)
@@ -75,20 +75,22 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
 		read_point = canny_image.at<uint8_t>(300, desired_middle_point - j);
 		if(read_point > 100) {
 			middlepoint = desired_middle_point - j;
+			break;
 		}
-        // Look for the closest edge (= light pixel) right from the center
-        read_point = canny_image.at<uint8_t>(300, desired_middle_point + j);
-        if(read_point > 100) {
-            middlepoint = desired_middle_point + j;
-        }
+		// Look for the closest edge (= light pixel) right from the center
+		read_point = canny_image.at<uint8_t>(300, desired_middle_point + j);
+		if(read_point > 100) {
+			middlepoint = desired_middle_point + j;
+			break;
+		}
 	}
 	//ROS_INFO("bottomleft: %i , bottomright: %i , topleft: %i , topright: %i" , bottomleft, bottomright, topleft, topright);
 
 	x = desired_middle_point - middlepoint;
-    current_time_twist = ros::Time::now();
-    dx_dt = ((double) (x - last_x)) / 100; // dt_twist;
+	current_time_twist = ros::Time::now();
+	dx_dt = ((double) (x - last_x)) / 100; // dt_twist;
 
-	// simple P-controler
+	// simple PD-controler
 	steering.data = -(int(kp * (-x)) + int(kd * (-dx_dt))) + 90 + YAW_OFFSET;
 	// limit steering data (0..180)
 	if(steering.data < 0) steering.data = 0;
@@ -97,40 +99,40 @@ void cLaneDetectionFu::ProcessInput(const sensor_msgs::Image::ConstPtr& msg)
 	ROS_INFO("x is : %i, change rate: %f, change Steering Data is: %i", x, dx_dt, steering.data);
 	#endif
 
-    last_x = x;
-    last_time_twist = current_time_twist;
+	last_x = x;
+	last_time_twist = current_time_twist;
 }
 
 void cLaneDetectionFu::pubRGBImageMsg(cv::Mat& rgb_mat)
 {
-    sensor_msgs::ImagePtr rgb_img(new sensor_msgs::Image);
+	sensor_msgs::ImagePtr rgb_img(new sensor_msgs::Image);
 
-    ros::Time head_time_stamp = ros::Time::now();
-    std::string rgb_frame_id = "_rgb_optical_frame";
-    sensor_msgs::CameraInfoPtr rgb_camera_info;
-    unsigned int head_sequence_id = 0;
+	ros::Time head_time_stamp = ros::Time::now();
+	std::string rgb_frame_id = "_rgb_optical_frame";
+	sensor_msgs::CameraInfoPtr rgb_camera_info;
+	unsigned int head_sequence_id = 0;
 
-    rgb_img->header.seq = head_sequence_id;
-    rgb_img->header.stamp = head_time_stamp;
-    rgb_img->header.frame_id = rgb_frame_id;
+	rgb_img->header.seq = head_sequence_id;
+	rgb_img->header.stamp = head_time_stamp;
+	rgb_img->header.frame_id = rgb_frame_id;
 
-    rgb_img->width = rgb_mat.cols;
-    rgb_img->height = rgb_mat.rows;
+	rgb_img->width = rgb_mat.cols;
+	rgb_img->height = rgb_mat.rows;
 
-    rgb_img->encoding = sensor_msgs::image_encodings::BGR8;
-    rgb_img->is_bigendian = 0;
+	rgb_img->encoding = sensor_msgs::image_encodings::BGR8;
+	rgb_img->is_bigendian = 0;
 
-    int step = sizeof(unsigned char) * 3 * rgb_img->width;
-    int size = step * rgb_img->height;
-    rgb_img->step = step;
-    rgb_img->data.resize(size);
-    memcpy(&(rgb_img->data[0]), rgb_mat.data, size);
+	int step = sizeof(unsigned char) * 3 * rgb_img->width;
+	int size = step * rgb_img->height;
+	rgb_img->step = step;
+	rgb_img->data.resize(size);
+	memcpy(&(rgb_img->data[0]), rgb_mat.data, size);
 
-    rgb_camera_info->header.frame_id = rgb_frame_id;
-    rgb_camera_info->header.stamp = head_time_stamp;
-    rgb_camera_info->header.seq = head_sequence_id;
+	rgb_camera_info->header.frame_id = rgb_frame_id;
+	rgb_camera_info->header.stamp = head_time_stamp;
+	rgb_camera_info->header.seq = head_sequence_id;
 
-    image_publisher.publish(rgb_img, rgb_camera_info);
+	image_publisher.publish(rgb_img, rgb_camera_info);
 }
 
 
